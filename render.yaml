@@ -3,7 +3,7 @@ services:
     name: typing-race-server
     env: node
     buildCommand: cd server && npm install && pip install -r requirements.txt
-    startCommand: cd server && node index.js
+    startCommand: node server/index.js
     envVars:
       - key: ADMIN_PASSWORD
         value: race2024!
