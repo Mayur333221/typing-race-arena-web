@@ -1,19 +1,25 @@
 FROM node:18
 
-# Install Python
-RUN apt-get update && apt-get install -y python3 python3-pip
+# Install Python + venv support
+RUN apt-get update && apt-get install -y python3 python3-venv python3-pip
 
-# Set working dir
 WORKDIR /app
 
-# Copy everything
+# Copy project
 COPY . .
 
 # Install Node deps
 RUN cd server && npm install
 
-# Install Python deps
-RUN pip3 install -r server/requirements.txt
+# Create Python virtual environment
+RUN python3 -m venv /opt/venv
+
+# Activate venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install Python deps inside venv
+RUN pip install --upgrade pip
+RUN pip install -r server/requirements.txt
 
 # Expose port
 EXPOSE 3001
