@@ -1,0 +1,8 @@
+[build]
+builder = "nixpacks"
+buildCommand = buildCommand = "cd server && npm install && pip install -r requirements.txt"
+
+[deploy]
+startCommand = "cd server && node index.js"
+healthcheckPath = "/health"
+restartPolicyType = "on_failure"
