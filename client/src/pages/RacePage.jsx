@@ -360,6 +360,7 @@ useEffect(() => { sentResultRef.current = sentResult; }, [sentResult]);
 
   // ==================== MY RANK ===================
   const myRank = (phase === "finished" ? finalBoard : liveBoard).findIndex(r => r.name === playerName);
+  const countdownDisplay = countdown == null ? null : Math.max(1, Math.ceil(Number(countdown)));
 
   // ==================== ERROR / LOADING ====================
   if (phase === "error") {
@@ -431,9 +432,9 @@ useEffect(() => { sentResultRef.current = sentResult; }, [sentResult]);
 
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {/* Timer display */}
-          {countdown && phase === "countdown" && (
+          {countdownDisplay !== null && phase === "countdown" && (
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 20, fontWeight: 700, color: "var(--gold)", padding: "4px 14px", background: "rgba(255,214,0,0.1)", borderRadius: "var(--radius-sm)", border: "1px solid rgba(255,214,0,0.2)" }}>
-              🚀 {countdown}s
+              🚀 {countdownDisplay}s
             </div>
           )}
           {timeLeft && phase === "race" && (
@@ -476,11 +477,14 @@ useEffect(() => { sentResultRef.current = sentResult; }, [sentResult]);
       </div>
 
       {/* Countdown overlay */}
-      {phase === "countdown" && countdown && (
+      {phase === "countdown" && countdownDisplay !== null && (
         <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(5,8,16,0.8)", backdropFilter: "blur(8px)" }}>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 120, fontWeight: 800, fontFamily: "var(--font-mono)", color: "var(--cyan)", lineHeight: 1, animation: "countdown 1s ease forwards", textShadow: "0 0 40px rgba(0,229,255,0.5)" }}>
-              {Math.ceil(parseFloat(countdown))}
+            <div
+              key={countdownDisplay}
+              style={{ fontSize: 120, fontWeight: 800, fontFamily: "var(--font-mono)", color: "var(--cyan)", lineHeight: 1, animation: "countdown 1s ease forwards", textShadow: "0 0 40px rgba(0,229,255,0.5)" }}
+            >
+              {countdownDisplay}
             </div>
             <div style={{ fontSize: 18, color: "var(--fg3)", marginTop: 16, fontFamily: "var(--font-mono)" }}>
               Get ready to type!
