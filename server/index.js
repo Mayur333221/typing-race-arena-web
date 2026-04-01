@@ -68,7 +68,11 @@ app.use(express.json());
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: { origin: "*", methods: ["GET", "POST"] },
+  cors: { origin: [
+  "http://localhost:5173",
+  "https://typing-race-arena-web.vercel.app"
+],
+credentials: true, methods: ["GET", "POST"] },
   pingTimeout: 60000,
   pingInterval: 25000,
 });
