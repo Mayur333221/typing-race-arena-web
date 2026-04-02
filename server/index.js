@@ -10,6 +10,24 @@ import { dirname, join } from "path";
 import { existsSync } from "fs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const allowedOrigins = (process.env.CLIENT_ORIGINS || [
+  "http://localhost:5173",
+  "https://typing-race-arena-web.vercel.app",
+].join(","))
+  .split(",")
+  .map(origin => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Origin not allowed: ${origin}`));
+  },
+  credentials: true,
+  methods: ["GET", "POST"],
+};
 
 function generateMarkovPrompt(minWords) {
   return new Promise((resolve) => {
@@ -28,7 +46,7 @@ function generateMarkovPrompt(minWords) {
     const script = join(__dirname, "markov_gen.py");
 
     execFile(
-      "python",
+      "python3",
       [script, pklPath, String(minWords)],
       { timeout: 15000 },
       (err, stdout, stderr) => {
@@ -63,16 +81,12 @@ function generateMarkovPrompt(minWords) {
 }
 
 const app = express();
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: { origin: [
-  "http://localhost:5173",
-  "https://typing-race-arena-web.vercel.app"
-],
-credentials: true, methods: ["GET", "POST"] },
+  cors: corsOptions,
   pingTimeout: 60000,
   pingInterval: 25000,
 });
