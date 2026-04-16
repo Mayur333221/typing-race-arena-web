@@ -68,7 +68,12 @@ export default function AdminPage() {
     socket.on("state", (data) => {
       if (data.prompt) setPrompt(data.prompt);
       setRaceRunning(!!data.raceRunning);
-      setRaceStartEpoch(data.raceStartEpoch || null);
+      if (data.raceStartEpoch && typeof data.serverNow === "number") {
+        const offset = data.serverNow - Date.now() / 1000;
+        setRaceStartEpoch(data.raceStartEpoch - offset);
+      } else {
+        setRaceStartEpoch(data.raceStartEpoch || null);
+      }
       if (data.durationS) setDurationS(data.durationS);
       if (data.round) setRound(data.round);
     });

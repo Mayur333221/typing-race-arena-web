@@ -95,6 +95,16 @@ useEffect(() => { promptRef.current = prompt; }, [prompt]);
 useEffect(() => { durationRef.current = durationS; }, [durationS]);
 useEffect(() => { roundModeRef.current = roundMode; }, [roundMode]);
 useEffect(() => { sentResultRef.current = sentResult; }, [sentResult]);
+
+  // Convert a server-clock epoch into the client's local clock so countdown
+  // works correctly even when the user's device clock is skewed from the server.
+  const adjustEpoch = (serverEpoch, serverNowAtSend) => {
+    if (!serverEpoch) return null;
+    if (typeof serverNowAtSend !== "number") return serverEpoch;
+    const offset = serverNowAtSend - now();
+    return serverEpoch - offset;
+  };
+
   // ==================== JOIN ====================
   useEffect(() => {
    if (!socket || !roomId || !nameSubmitted || phase !== "joining") return;
@@ -113,7 +123,7 @@ useEffect(() => { sentResultRef.current = sentResult; }, [sentResult]);
     socket.on("state", (data) => {
       if (data.prompt) setPrompt(data.prompt);
       setDurationS(data.durationS || 60);
-      setRaceStartEpoch(data.raceStartEpoch || null);
+      setRaceStartEpoch(adjustEpoch(data.raceStartEpoch, data.serverNow));
       setRaceRunning(!!data.raceRunning);
       if (data.round) setRoundMode(data.round);
     });
@@ -123,7 +133,7 @@ useEffect(() => { sentResultRef.current = sentResult; }, [sentResult]);
     socket.on("start", (data) => {
       setPrompt(data.prompt);
       setDurationS(data.durationS);
-      setRaceStartEpoch(data.raceStartEpoch);
+      setRaceStartEpoch(adjustEpoch(data.raceStartEpoch, data.serverNow));
       setRaceRunning(true);
       setRoundMode(data.round || ROUND_BASIC);
       setBlindConfig({ hideAfter: data.blindHideAfter || 10, showEvery: data.blindShowEvery || 30, showDuration: data.blindShowDuration || 3 });
